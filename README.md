@@ -153,3 +153,4 @@ Options:
 | **Ctrl + 0** | Tilbakestill zoom |
 | **F12** / **Ctrl + `** | Slå av/på integrert terminal |
 | **Ctrl + Q** | Avslutt programmet |
+# uberpad
