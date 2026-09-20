@@ -304,6 +304,9 @@ bool MainWindow::maybeSave(CodeEditor *editor) {
         return onSaveFile();
     } else if (ret == QMessageBox::Cancel) {
         return false;
+    } else if (ret == QMessageBox::Discard) {
+        editor->document()->setModified(false);
+        return true;
     }
     return true;
 }
@@ -324,9 +327,23 @@ bool MainWindow::onCloseTab(int index) {
 }
 
 bool MainWindow::onCloseAllTabs() {
-    while (m_tabWidget->count() > 0) {
-        if (!onCloseTab(0)) return false;
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        CodeEditor *editor = qobject_cast<CodeEditor*>(m_tabWidget->widget(i));
+        if (editor && editor->document()->isModified()) {
+            m_tabWidget->setCurrentIndex(i);
+            if (!maybeSave(editor)) {
+                return false;
+            }
+        }
     }
+
+    while (m_tabWidget->count() > 0) {
+        CodeEditor *editor = qobject_cast<CodeEditor*>(m_tabWidget->widget(0));
+        m_tabWidget->removeTab(0);
+        delete editor;
+    }
+
+    onNewFile();
     return true;
 }
 
@@ -373,13 +390,16 @@ void MainWindow::onTabContextMenu(const QPoint &pos) {
     QMenu menu(this);
     menu.addAction(tr("Close Tab"), [this, idx]() { onCloseTab(idx); });
     menu.addAction(tr("Close Other Tabs"), [this, idx]() {
+        QWidget *target = m_tabWidget->widget(idx);
         for (int i = m_tabWidget->count() - 1; i >= 0; --i) {
-            if (i != idx) onCloseTab(i);
+            if (m_tabWidget->widget(i) != target) {
+                if (!onCloseTab(i)) break;
+            }
         }
     });
     menu.addAction(tr("Close Tabs to the Right"), [this, idx]() {
         for (int i = m_tabWidget->count() - 1; i > idx; --i) {
-            onCloseTab(i);
+            if (!onCloseTab(i)) break;
         }
     });
     menu.addAction(tr("Close All"), this, &MainWindow::onCloseAllTabs);
@@ -865,11 +885,17 @@ void MainWindow::createDocks() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    if (onCloseAllTabs()) {
-        event->accept();
-    } else {
-        event->ignore();
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        CodeEditor *editor = qobject_cast<CodeEditor*>(m_tabWidget->widget(i));
+        if (editor && editor->document()->isModified()) {
+            m_tabWidget->setCurrentIndex(i);
+            if (!maybeSave(editor)) {
+                event->ignore();
+                return;
+            }
+        }
     }
+    event->accept();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
