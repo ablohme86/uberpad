@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QStyleFactory>
+#include <QIcon>
 #include <iostream>
 #include <cstdlib>
 
@@ -60,6 +61,12 @@ int main(int argc, char *argv[]) {
     app.setApplicationDisplayName(QStringLiteral("UberPad"));
     app.setApplicationVersion(QStringLiteral("1.0.0"));
     app.setOrganizationName(QStringLiteral("UberPad"));
+
+    QIcon appIcon(QStringLiteral(":/icons/uberpad-256.png"));
+    appIcon.addFile(QStringLiteral(":/icons/uberpad-64.png"), QSize(64, 64));
+    appIcon.addFile(QStringLiteral(":/icons/uberpad-32.png"), QSize(32, 32));
+    appIcon.addFile(QStringLiteral(":/icons/uberpad.png"));
+    app.setWindowIcon(appIcon);
 
     // Modern Fusion style
     if (QStyleFactory::keys().contains(QStringLiteral("Fusion"), Qt::CaseInsensitive)) {

@@ -9,6 +9,7 @@
 #include <KSyntaxHighlighting/Definition>
 #include <KSyntaxHighlighting/Theme>
 #include <KSyntaxHighlighting/SyntaxHighlighter>
+#include "../core/RemoteClient.h"
 
 namespace UberPad {
 
@@ -49,7 +50,13 @@ public:
     bool saveToFile(const QString &filePath = QString());
     QString filePath() const { return m_filePath; }
     QString fileName() const;
-    bool isUntitled() const { return m_filePath.isEmpty(); }
+    bool isUntitled() const { return m_filePath.isEmpty() && !m_isRemote; }
+
+    // Remote operations
+    bool isRemote() const { return m_isRemote; }
+    QString remotePath() const { return m_remotePath; }
+    RemoteConfig remoteConfig() const { return m_remoteConfig; }
+    void setRemoteInfo(const QString &remotePath, const RemoteConfig &config);
 
     // Line Endings
     LineEnding lineEnding() const { return m_lineEnding; }
@@ -107,6 +114,9 @@ private:
     KSyntaxHighlighting::Theme m_theme;
 
     QString m_filePath;
+    bool m_isRemote = false;
+    QString m_remotePath;
+    RemoteConfig m_remoteConfig;
     LineEnding m_lineEnding = LineEnding::LF;
     int m_baseFontSize = 11;
     int m_currentZoomLevel = 0;

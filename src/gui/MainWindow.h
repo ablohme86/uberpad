@@ -10,6 +10,7 @@
 #include "SearchReplaceBar.h"
 #include "FileTreeWidget.h"
 #include "TerminalWidget.h"
+#include "RemoteWorkspaceWidget.h"
 
 namespace UberPad {
 
@@ -32,6 +33,8 @@ private slots:
     void onNewFile();
     void onOpenFile();
     void onOpenFolder();
+    void onOpenRemoteWorkspace();
+    void onRemoteFileOpened(const QString &remotePath, const QByteArray &data, const RemoteConfig &config);
     bool onSaveFile();
     bool onSaveFileAs();
     bool onSaveAll();
@@ -75,6 +78,7 @@ private:
     CodeEditor* currentEditor() const;
     CodeEditor* createEditorTab(const QString &title = QStringLiteral("Untitled"));
     bool maybeSave(CodeEditor *editor);
+    bool saveRemoteFile(CodeEditor *editor);
 
     QTabWidget *m_tabWidget;
     SearchReplaceBar *m_searchBar;
@@ -82,6 +86,9 @@ private:
     // Docks
     QDockWidget *m_workspaceDock;
     FileTreeWidget *m_fileTree;
+
+    QDockWidget *m_remoteDock;
+    RemoteWorkspaceWidget *m_remoteWorkspace;
 
     QDockWidget *m_terminalDock;
     TerminalWidget *m_terminal;

@@ -11,6 +11,7 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(Curses REQUIRED)
+find_package(CURL REQUIRED)
 
 set(SOURCES
     src/main.cpp
@@ -18,6 +19,8 @@ set(SOURCES
     src/core/Config.cpp
     src/core/SyntaxManager.h
     src/core/SyntaxManager.cpp
+    src/core/RemoteClient.h
+    src/core/RemoteClient.cpp
     src/gui/MainWindow.h
     src/gui/MainWindow.cpp
     src/gui/CodeEditor.h
@@ -30,6 +33,10 @@ set(SOURCES
     src/gui/TerminalWidget.cpp
     src/gui/GoToLineDialog.h
     src/gui/GoToLineDialog.cpp
+    src/gui/RemoteConnectDialog.h
+    src/gui/RemoteConnectDialog.cpp
+    src/gui/RemoteWorkspaceWidget.h
+    src/gui/RemoteWorkspaceWidget.cpp
     src/tui/TuiApp.h
     src/tui/TuiApp.cpp
     src/tui/TuiBuffer.h
@@ -42,18 +49,28 @@ set(SOURCES
     src/tui/TuiMenuBar.cpp
 )
 
-add_executable(uberpad ${SOURCES})
+set(RESOURCES
+    resources/app.qrc
+)
+
+add_executable(uberpad ${SOURCES} ${RESOURCES})
 
 target_include_directories(uberpad PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CURSES_INCLUDE_DIRS}
+    ${CURL_INCLUDE_DIRS}
 )
 
 target_link_libraries(uberpad PRIVATE
     Qt6::Widgets
     KF6::SyntaxHighlighting
     ${CURSES_LIBRARIES}
+    CURL::libcurl
     util
 )
 
 install(TARGETS uberpad DESTINATION bin)
+install(FILES uberpad.desktop DESTINATION share/applications)
+install(FILES resources/icons/uberpad-256.png DESTINATION share/icons/hicolor/256x256/apps RENAME uberpad.png)
+install(FILES resources/icons/uberpad-64.png DESTINATION share/icons/hicolor/64x64/apps RENAME uberpad.png)
+install(FILES resources/icons/uberpad-32.png DESTINATION share/icons/hicolor/32x32/apps RENAME uberpad.png)

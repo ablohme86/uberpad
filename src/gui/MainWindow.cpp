@@ -17,9 +17,11 @@
 #include <QUrl>
 #include <QTabBar>
 #include <QVBoxLayout>
+#include "RemoteConnectDialog.h"
 #include <QApplication>
 #include <QShortcut>
 #include <QClipboard>
+#include <QIcon>
 
 namespace UberPad {
 
@@ -29,6 +31,13 @@ MainWindow::MainWindow(QWidget *parent)
     , m_searchBar(new SearchReplaceBar(this))
 {
     setWindowTitle(QStringLiteral("UberPad"));
+
+    QIcon appIcon(QStringLiteral(":/icons/uberpad-256.png"));
+    appIcon.addFile(QStringLiteral(":/icons/uberpad-64.png"), QSize(64, 64));
+    appIcon.addFile(QStringLiteral(":/icons/uberpad-32.png"), QSize(32, 32));
+    appIcon.addFile(QStringLiteral(":/icons/uberpad.png"));
+    setWindowIcon(appIcon);
+
     resize(1150, 750);
     setAcceptDrops(true);
 
@@ -143,9 +152,86 @@ void MainWindow::onOpenFolder() {
     }
 }
 
+void MainWindow::onOpenRemoteWorkspace() {
+    m_remoteDock->show();
+    m_remoteDock->raise();
+    RemoteConnectDialog dlg(this);
+    if (dlg.exec() == QDialog::Accepted) {
+        m_remoteWorkspace->connectToServer(dlg.config());
+    }
+}
+
+void MainWindow::onRemoteFileOpened(const QString &remotePath, const QByteArray &data, const RemoteConfig &config) {
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        CodeEditor *ed = qobject_cast<CodeEditor*>(m_tabWidget->widget(i));
+        if (ed && ed->isRemote() && ed->remotePath() == remotePath && ed->remoteConfig().host == config.host) {
+            m_tabWidget->setCurrentIndex(i);
+            return;
+        }
+    }
+
+    CodeEditor *editor = nullptr;
+    if (m_tabWidget->count() == 1) {
+        CodeEditor *first = qobject_cast<CodeEditor*>(m_tabWidget->widget(0));
+        if (first && first->isUntitled() && !first->document()->isModified() && first->toPlainText().isEmpty()) {
+            editor = first;
+        }
+    }
+
+    if (!editor) {
+        editor = createEditorTab();
+    }
+
+    editor->setPlainText(QString::fromUtf8(data));
+    editor->setRemoteInfo(remotePath, config);
+    editor->document()->setModified(false);
+
+    int idx = m_tabWidget->indexOf(editor);
+    m_tabWidget->setTabText(idx, editor->fileName());
+    m_tabWidget->setTabToolTip(idx, QStringLiteral("%1://%2:%3%4")
+                                        .arg(config.protocolString())
+                                        .arg(config.host)
+                                        .arg(config.port)
+                                        .arg(remotePath));
+    m_tabWidget->setCurrentWidget(editor);
+    updateStatusBar();
+}
+
+bool MainWindow::saveRemoteFile(CodeEditor *editor) {
+    if (!editor || !editor->isRemote()) return false;
+
+    QByteArray data = editor->toPlainText().toUtf8();
+    QString error;
+    RemoteClient client(editor->remoteConfig());
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    bool ok = client.uploadFile(editor->remotePath(), data, error);
+    QApplication::restoreOverrideCursor();
+
+    if (ok) {
+        editor->document()->setModified(false);
+        int idx = m_tabWidget->indexOf(editor);
+        if (idx >= 0) {
+            m_tabWidget->setTabText(idx, editor->fileName());
+        }
+        statusBar()->showMessage(tr("Saved remote file %1 (%2)").arg(editor->remotePath(), editor->remoteConfig().host), 3000);
+        updateStatusBar();
+        return true;
+    }
+
+    QMessageBox::critical(this, tr("Remote Save Failed"),
+                          tr("Could not save remote file '%1' to %2:\n%3")
+                              .arg(editor->remotePath(), editor->remoteConfig().host, error));
+    return false;
+}
+
 bool MainWindow::onSaveFile() {
     CodeEditor *editor = currentEditor();
     if (!editor) return false;
+
+    if (editor->isRemote()) {
+        return saveRemoteFile(editor);
+    }
 
     if (editor->isUntitled()) {
         return onSaveFileAs();
@@ -190,7 +276,9 @@ bool MainWindow::onSaveAll() {
     for (int i = 0; i < m_tabWidget->count(); ++i) {
         CodeEditor *ed = qobject_cast<CodeEditor*>(m_tabWidget->widget(i));
         if (ed && ed->document()->isModified()) {
-            if (ed->isUntitled()) {
+            if (ed->isRemote()) {
+                if (!saveRemoteFile(ed)) allOk = false;
+            } else if (ed->isUntitled()) {
                 m_tabWidget->setCurrentIndex(i);
                 if (!onSaveFileAs()) allOk = false;
             } else {
@@ -297,7 +385,20 @@ void MainWindow::onTabContextMenu(const QPoint &pos) {
     menu.addAction(tr("Close All"), this, &MainWindow::onCloseAllTabs);
     menu.addSeparator();
 
-    if (!ed->isUntitled()) {
+    if (ed->isRemote()) {
+        menu.addAction(tr("Copy Remote Path"), [ed]() {
+            QApplication::clipboard()->setText(ed->remotePath());
+        });
+        menu.addAction(tr("Copy Remote URL"), [ed]() {
+            QString url = QStringLiteral("%1://%2:%3%4")
+                              .arg(ed->remoteConfig().protocolString())
+                              .arg(ed->remoteConfig().host)
+                              .arg(ed->remoteConfig().port)
+                              .arg(ed->remotePath());
+            QApplication::clipboard()->setText(url);
+        });
+        menu.addSeparator();
+    } else if (!ed->isUntitled()) {
         menu.addAction(tr("Copy Full Path"), [ed]() {
             QApplication::clipboard()->setText(ed->filePath());
         });
@@ -522,6 +623,7 @@ void MainWindow::createMenus() {
     m_fileMenu->addAction(tr("&New"), QKeySequence::New, this, &MainWindow::onNewFile);
     m_fileMenu->addAction(tr("&Open..."), QKeySequence::Open, this, &MainWindow::onOpenFile);
     m_fileMenu->addAction(tr("Open Folder as &Workspace..."), QKeySequence(Qt::CTRL | Qt::Key_K), this, &MainWindow::onOpenFolder);
+    m_fileMenu->addAction(tr("Connect to &Remote (SFTP/FTP)..."), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R), this, &MainWindow::onOpenRemoteWorkspace);
     m_fileMenu->addSeparator();
     m_fileMenu->addAction(tr("&Save"), QKeySequence::Save, this, &MainWindow::onSaveFile);
     m_fileMenu->addAction(tr("Save &As..."), QKeySequence::SaveAs, this, &MainWindow::onSaveFileAs);
@@ -679,6 +781,10 @@ void MainWindow::createToolBars() {
         m_workspaceDock->setVisible(!m_workspaceDock->isVisible());
     })->setToolTip(tr("Toggle Workspace sidebar"));
 
+    tb->addAction(tr("🌐 Remote"), this, [this]() {
+        m_remoteDock->setVisible(!m_remoteDock->isVisible());
+    })->setToolTip(tr("Toggle Remote SFTP/FTP Workspace sidebar"));
+
     tb->addAction(tr("🖥 Terminal"), this, [this]() {
         m_terminalDock->setVisible(!m_terminalDock->isVisible());
     })->setToolTip(tr("Toggle Integrated Terminal (F12)"));
@@ -735,6 +841,17 @@ void MainWindow::createDocks() {
         openFiles({ path });
     });
 
+    // Remote Workspace Dock (SFTP / FTP)
+    m_remoteDock = new QDockWidget(tr("Remote Workspace (SFTP / FTP)"), this);
+    m_remoteDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_remoteWorkspace = new RemoteWorkspaceWidget(m_remoteDock);
+    m_remoteDock->setWidget(m_remoteWorkspace);
+    addDockWidget(Qt::LeftDockWidgetArea, m_remoteDock);
+    tabifyDockWidget(m_workspaceDock, m_remoteDock);
+    m_workspaceDock->raise();
+
+    connect(m_remoteWorkspace, &RemoteWorkspaceWidget::remoteFileOpened, this, &MainWindow::onRemoteFileOpened);
+
     // Terminal Dock (Integrated PTY terminal)
     m_terminalDock = new QDockWidget(tr("Terminal"), this);
     m_terminalDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
@@ -743,6 +860,7 @@ void MainWindow::createDocks() {
     addDockWidget(Qt::BottomDockWidgetArea, m_terminalDock);
 
     m_viewMenu->addAction(m_workspaceDock->toggleViewAction());
+    m_viewMenu->addAction(m_remoteDock->toggleViewAction());
     m_viewMenu->addAction(m_terminalDock->toggleViewAction());
 }
 

@@ -225,8 +225,26 @@ QString CodeEditor::languageName() const {
 }
 
 QString CodeEditor::fileName() const {
+    if (m_isRemote) {
+        QFileInfo fi(m_remotePath);
+        QString name = fi.fileName().isEmpty() ? m_remotePath : fi.fileName();
+        return QStringLiteral("[%1] %2").arg(m_remoteConfig.protocolString().toUpper(), name);
+    }
     if (m_filePath.isEmpty()) return QStringLiteral("Untitled");
     return QFileInfo(m_filePath).fileName();
+}
+
+void CodeEditor::setRemoteInfo(const QString &remotePath, const RemoteConfig &config) {
+    m_isRemote = true;
+    m_remotePath = remotePath;
+    m_remoteConfig = config;
+    m_filePath.clear();
+
+    auto def = SyntaxManager::instance().definitionForFileName(remotePath);
+    if (!def.isValid()) {
+        def = SyntaxManager::instance().definitionForMimeType(QStringLiteral("text/plain"));
+    }
+    setDefinition(def);
 }
 
 QString CodeEditor::lineEndingName() const {

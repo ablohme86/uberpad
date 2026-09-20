@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/uberpad.png</file>
+        <file>icons/uberpad-256.png</file>
+        <file>icons/uberpad-64.png</file>
+        <file>icons/uberpad-32.png</file>
+    </qresource>
+</RCC>

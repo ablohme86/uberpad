@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=UberPad
+GenericName=Text Editor
+Comment=Notepad++ equivalent C++/Qt6 code editor with TUI and remote SFTP/FTP support
+Exec=uberpad %F
+Icon=uberpad
+Terminal=false
+Type=Application
+Categories=Development;TextEditor;Utility;
+Keywords=Text;Editor;Notepad;Development;Programming;
+MimeType=text/plain;text/x-c;text/x-c++;text/x-python;text/x-rust;text/x-go;text/x-javascript;application/json;text/markdown;
