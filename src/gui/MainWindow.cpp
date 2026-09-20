@@ -635,8 +635,12 @@ void MainWindow::createMenus() {
             m_terminalDock->raise();
         }
     });
-    m_terminalMenu->addAction(tr("Clear Terminal"), m_terminal, &TerminalWidget::clear);
-    m_terminalMenu->addAction(tr("Restart Terminal Shell"), m_terminal, &TerminalWidget::restartShell);
+    m_terminalMenu->addAction(tr("Clear Terminal"), this, [this]() {
+        if (m_terminal) m_terminal->clear();
+    });
+    m_terminalMenu->addAction(tr("Restart Terminal Shell"), this, [this]() {
+        if (m_terminal) m_terminal->restartShell();
+    });
 
     // Help Menu
     m_helpMenu = menuBar()->addMenu(tr("&Help"));
