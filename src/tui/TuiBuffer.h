@@ -29,7 +29,9 @@ public:
     void setModified(bool mod) { m_modified = mod; }
 
     KSyntaxHighlighting::Definition definition() const { return m_definition; }
+    void setDefinition(const KSyntaxHighlighting::Definition &def) { m_definition = def; }
     QString languageName() const;
+    int characterCount() const;
 
     // Editing
     void insertChar(QChar ch);
@@ -37,6 +39,8 @@ public:
     void backspace();
     void deleteChar();
     void insertTab();
+    void duplicateLine();
+    void toggleComment();
 
     // Navigation
     void moveUp();

@@ -32,6 +32,14 @@ QString TuiBuffer::languageName() const {
     return QStringLiteral("Plain Text");
 }
 
+int TuiBuffer::characterCount() const {
+    int total = 0;
+    for (const auto &l : m_lines) {
+        total += l.size() + 1;
+    }
+    return std::max(0, total - 1);
+}
+
 void TuiBuffer::updateSyntaxDefinition() {
     if (!m_filePath.isEmpty()) {
         m_definition = SyntaxManager::instance().definitionForFileName(m_filePath);
@@ -264,6 +272,56 @@ bool TuiBuffer::find(const QString &query, bool forward) {
         }
     }
     return false;
+}
+
+void TuiBuffer::duplicateLine() {
+    ensureCursorValid();
+    QString cur = m_lines[m_cursorRow];
+    m_lines.insert(m_lines.begin() + m_cursorRow + 1, cur);
+    m_cursorRow++;
+    m_modified = true;
+}
+
+void TuiBuffer::toggleComment() {
+    ensureCursorValid();
+    QString &cur = m_lines[m_cursorRow];
+    QString lang = languageName().toLower();
+    QString prefix = QStringLiteral("// ");
+    if (lang.contains("python") || lang.contains("bash") || lang.contains("shell")
+        || lang.contains("ruby") || lang.contains("perl") || lang.contains("yaml")
+        || lang.contains("dockerfile") || lang.contains("r") || lang.contains("makefile")
+        || lang.contains("cmake") || lang.contains("toml")) {
+        prefix = QStringLiteral("# ");
+    } else if (lang.contains("sql") || lang.contains("lua") || lang.contains("haskell")) {
+        prefix = QStringLiteral("-- ");
+    } else if (lang.contains("ini") || lang.contains("asm")) {
+        prefix = QStringLiteral("; ");
+    }
+
+    QString trimmedPrefix = prefix.trimmed();
+    QString trimmedLine = cur.trimmed();
+
+    if (trimmedLine.startsWith(trimmedPrefix)) {
+        // Uncomment
+        int idx = cur.indexOf(trimmedPrefix);
+        if (idx >= 0) {
+            int len = trimmedPrefix.size();
+            if (idx + len < cur.size() && cur[idx + len] == ' ') {
+                ++len;
+            }
+            cur.remove(idx, len);
+            m_cursorCol = std::max(0, m_cursorCol - len);
+        }
+    } else {
+        // Comment
+        int spaces = 0;
+        while (spaces < cur.size() && cur[spaces].isSpace()) {
+            ++spaces;
+        }
+        cur.insert(spaces, prefix);
+        m_cursorCol += prefix.size();
+    }
+    m_modified = true;
 }
 
 } // namespace UberPad

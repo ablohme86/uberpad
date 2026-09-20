@@ -36,6 +36,10 @@ set(SOURCES
     src/tui/TuiBuffer.cpp
     src/tui/TuiHighlighter.h
     src/tui/TuiHighlighter.cpp
+    src/tui/TuiFileTree.h
+    src/tui/TuiFileTree.cpp
+    src/tui/TuiMenuBar.h
+    src/tui/TuiMenuBar.cpp
 )
 
 add_executable(uberpad ${SOURCES})

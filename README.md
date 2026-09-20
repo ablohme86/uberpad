@@ -60,12 +60,15 @@ UberPad har tosidig terminalstøtte:
    - Hurtigknapp for å skifte mappe direkte til den aktive filens mappe (`cd "<dir>"`).
 2. **Dedikert frittstående TUI-modus (`uberpad --tui [filer...]`):**
    - Kjører direkte i terminalen (via `ncursesw`) uten behov for grafisk visning (Wayland/X11).
-   - Aktiveres automatisk dersom programmet startes i et rent terminalmiljø (f.eks. over SSH uten GUI).
-   - Linjenummer-kolonne på venstre side.
-   - **Full syntaksfarging i terminalen** via samme KF6-motor!
-   - Søk med hurtigsøk (**Ctrl+F**) og gult treff-overlay.
-   - Hopp til linje (**Ctrl+G**).
-   - Lagre (**Ctrl+S**) og avslutt (**Ctrl+Q**).
+   - Designet for å matche Qt GUI-layouten mest mulig:
+     - **Topp-menylinje (F10):** Interaktive rullegardinsmenyer (*File, Edit, Search, View, Language, Help*).
+     - **Dokument-fanelinje (Row 1):** Viser åpne dokumenter (`[ 1: main.cpp * ] [ 2: CMakeLists.txt ]`), veksle med `F7`/`F8` eller `Ctrl+B`/`Ctrl+T`.
+     - **Filutforsker-sidemeny (F9):** Venstre sidepanel som viser mapper og filer i prosjektet (*Folder as Workspace*). Naviger med piltastene, trykk `Enter` for å åpne fil eller utvide/lukke mappe.
+     - **Fokus-veksling (Tab):** `Tab`-tasten bytter aktivt fokus direkte mellom filutforsker-sidemenyen og editoren.
+     - **Linjenummer-kolonne:** Viser linjenumre med fargeindikasjon for aktiv linje.
+     - **Full syntaksfarging i terminalen** via samme KDE KF6-motor (460+ språk).
+     - **Statuslinje:** Matcher GUI-statuslinjen (`Ln X, Col Y │ Lines: N, Length: M │ Unix (LF) │ UTF-8 │ C++ │ INS`).
+     - **Snarveier:** `Ctrl+N` (ny), `Ctrl+O` (åpne), `Ctrl+S` (lagre), `Ctrl+W` (lukk fane), `Ctrl+F` (søk), `Ctrl+G` (hopp til linje), `Ctrl+D` (dupliser linje), `Ctrl+/` (kommenter), `Ctrl+Q` (avslutt).
 
 ---
 
