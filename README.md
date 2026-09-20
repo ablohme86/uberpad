@@ -109,14 +109,46 @@ make run        # Bygger og starter i GUI-modus
 make tui        # Bygger og starter i TUI-modus
 make debug      # Bygger med debug-symboler
 make clean      # Fjerner kompileringsfiler
-sudo make install # Installerer uberpad, desktop-fil og ikoner til /usr/local
+make help       # Viser alle tilgjengelige mål
+```
+
+### Installasjon
+
+Begge målene installerer binærfila, `.desktop`-oppføringa og hele ikonsettet,
+og oppdaterer deretter meny- og ikoncachene slik at UberPad dukker opp i
+programmenyen til KDE, GNOME, XFCE, Cinnamon m.fl. uten utlogging.
+
+```bash
+make install-user      # Kun for innlogget bruker -> ~/.local (ingen root)
+sudo make install      # Systemomfattende -> /usr/local
+
+make uninstall-user    # Fjerner brukerinstallasjonen
+sudo make uninstall    # Fjerner systeminstallasjonen
+```
+
+Velg et annet mål med `PREFIX`, f.eks. `make install PREFIX=/opt/uberpad`.
+`DESTDIR` støttes for pakkebygging (cache-oppdateringen hoppes da over).
+
+Merk: ved `make install-user` skrives den absolutte stien inn i `.desktop`-fila,
+så menyoppføringa virker uansett om `~/.local/bin` ligger i `PATH`. For å kunne
+kjøre `uberpad` fra skallet legger du til stien – for fish:
+```fish
+fish_add_path ~/.local/bin
 ```
 
 ### Alternativ bygging med CMake
 ```bash
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
+cmake --install build --prefix ~/.local
 ```
+
+### Programikonet
+
+Ikonet er en vektortegnet kameleon og genereres fra
+`resources/icons/generate-icons.py`, som skriver `uberpad.svg` og PNG-settet
+(16–512 px). Kjør `make icons` etter endringer i skriptet.
+`--dark`-flagget gir en mørk variant med fargeovergang i selve kameleonen.
 
 ---
 

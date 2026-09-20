@@ -71,6 +71,10 @@ target_link_libraries(uberpad PRIVATE
 
 install(TARGETS uberpad DESTINATION bin)
 install(FILES uberpad.desktop DESTINATION share/applications)
-install(FILES resources/icons/uberpad-256.png DESTINATION share/icons/hicolor/256x256/apps RENAME uberpad.png)
-install(FILES resources/icons/uberpad-64.png DESTINATION share/icons/hicolor/64x64/apps RENAME uberpad.png)
-install(FILES resources/icons/uberpad-32.png DESTINATION share/icons/hicolor/32x32/apps RENAME uberpad.png)
+install(FILES resources/icons/uberpad.svg DESTINATION share/icons/hicolor/scalable/apps)
+
+foreach(ICON_SIZE 16 24 32 48 64 128 256 512)
+    install(FILES resources/icons/uberpad-${ICON_SIZE}.png
+            DESTINATION share/icons/hicolor/${ICON_SIZE}x${ICON_SIZE}/apps
+            RENAME uberpad.png)
+endforeach()

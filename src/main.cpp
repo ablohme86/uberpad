@@ -61,11 +61,13 @@ int main(int argc, char *argv[]) {
     app.setApplicationDisplayName(QStringLiteral("UberPad"));
     app.setApplicationVersion(QStringLiteral("1.0.0"));
     app.setOrganizationName(QStringLiteral("UberPad"));
+    // Lets Wayland compositors match the window to uberpad.desktop (correct taskbar icon).
+    app.setDesktopFileName(QStringLiteral("uberpad"));
 
-    QIcon appIcon(QStringLiteral(":/icons/uberpad-256.png"));
-    appIcon.addFile(QStringLiteral(":/icons/uberpad-64.png"), QSize(64, 64));
-    appIcon.addFile(QStringLiteral(":/icons/uberpad-32.png"), QSize(32, 32));
-    appIcon.addFile(QStringLiteral(":/icons/uberpad.png"));
+    QIcon appIcon;
+    for (int size : {16, 24, 32, 48, 64, 128, 256, 512}) {
+        appIcon.addFile(QStringLiteral(":/icons/uberpad-%1.png").arg(size), QSize(size, size));
+    }
     app.setWindowIcon(appIcon);
 
     // Modern Fusion style
