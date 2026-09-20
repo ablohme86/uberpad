@@ -447,21 +447,82 @@ void TuiApp::handleInput(int ch) {
         return;
     }
 
-    // 1. Menu Bar Navigation
+    if (ch == 17) { // Ctrl+Q: Exit always works immediately
+        m_menuBar.setActive(false);
+        executeAction(TuiAction::FileExit);
+        return;
+    }
+
+    // 0. Handle Escape and Alt-key combinations (Alt+F, Alt+E, Alt+S, Alt+V, Alt+L, Alt+H, Alt+X)
+    if (ch == 27) {
+        nodelay(stdscr, TRUE);
+        int nextCh = getch();
+        nodelay(stdscr, FALSE);
+
+        if (nextCh != ERR) {
+            if (nextCh == '[' || nextCh == 'O') {
+                // ANSI escape sequence: read trailing command character
+                nodelay(stdscr, TRUE);
+                int code = getch();
+                nodelay(stdscr, FALSE);
+                if (code == 'C') ch = KEY_RIGHT;
+                else if (code == 'D') ch = KEY_LEFT;
+                else if (code == 'A') ch = KEY_UP;
+                else if (code == 'B') ch = KEY_DOWN;
+                else return;
+            } else {
+                // Alt + <key> pressed
+                if (nextCh == 'x' || nextCh == 'X') {
+                    executeAction(TuiAction::FileExit);
+                    return;
+                }
+                if (m_menuBar.openMenuByMnemonic((char)nextCh)) {
+                    return;
+                }
+                return;
+            }
+        } else {
+            // Standalone Escape key pressed
+            if (m_menuBar.isActive()) {
+                m_menuBar.setActive(false);
+                return;
+            }
+            if (m_focus == TuiFocus::Sidebar) {
+                m_focus = TuiFocus::Editor;
+                return;
+            }
+        }
+    }
+
+    // 1. Menu Bar Navigation & Shortcuts (DOS Edit style)
     if (m_menuBar.isActive()) {
         if (ch == KEY_LEFT) {
             m_menuBar.moveLeft();
+            return;
         } else if (ch == KEY_RIGHT) {
             m_menuBar.moveRight();
+            return;
         } else if (ch == KEY_UP) {
             m_menuBar.moveUp();
+            return;
         } else if (ch == KEY_DOWN) {
             m_menuBar.moveDown();
+            return;
         } else if (ch == 10 || ch == 13 || ch == KEY_ENTER) {
             TuiAction act = m_menuBar.triggerCurrent();
             executeAction(act);
-        } else if (ch == 27) { // Escape
-            m_menuBar.setActive(false);
+            return;
+        } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+            // Check if matches mnemonic in current dropdown
+            TuiAction act = m_menuBar.triggerByMnemonic((char)ch);
+            if (act != TuiAction::None) {
+                executeAction(act);
+                return;
+            }
+            // Or switch to another top menu
+            if (m_menuBar.openMenuByMnemonic((char)ch)) {
+                return;
+            }
         }
         return;
     }

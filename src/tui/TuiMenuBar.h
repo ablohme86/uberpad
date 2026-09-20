@@ -35,10 +35,12 @@ struct TuiMenuItem {
     QString title;
     QString shortcut;
     TuiAction action = TuiAction::None;
+    char mnemonic = '\0';
 };
 
 struct TuiMenu {
     QString title;
+    char mnemonic = '\0';
     std::vector<TuiMenuItem> items;
 };
 
@@ -48,6 +50,9 @@ public:
 
     bool isActive() const { return m_active; }
     void setActive(bool active);
+
+    bool openMenuByMnemonic(char key);
+    TuiAction triggerByMnemonic(char key);
 
     void moveLeft();
     void moveRight();
