@@ -11,6 +11,13 @@ Config& Config::instance() {
 Config::Config()
     : m_settings("UberPad", "UberPad")
 {
+    // Migrate the previous default once; later theme choices stay persistent.
+    if (!m_settings.value("appearance/siennaSlateDefault", false).toBool()) {
+        if (m_settings.value("editor/themeName", "Dracula").toString() == QStringLiteral("Dracula")) {
+            m_settings.setValue("editor/themeName", "Sienna & Slate");
+        }
+        m_settings.setValue("appearance/siennaSlateDefault", true);
+    }
 }
 
 QString Config::fontFamily() const {
@@ -86,7 +93,7 @@ void Config::setBracketMatching(bool match) {
 }
 
 QString Config::themeName() const {
-    return m_settings.value("editor/themeName", "Dracula").toString();
+    return m_settings.value("editor/themeName", "Sienna & Slate").toString();
 }
 
 void Config::setThemeName(const QString &theme) {

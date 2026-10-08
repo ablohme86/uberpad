@@ -8,6 +8,11 @@
 
 namespace UberPad {
 
+namespace {
+constexpr int NextTabKey = KEY_MAX + 1;
+constexpr int PreviousTabKey = KEY_MAX + 2;
+}
+
 TuiApp::TuiApp() {
     m_fileTree.setRootPath(QDir::currentPath());
 }
@@ -22,6 +27,11 @@ void TuiApp::initCurses() {
     raw();
     noecho();
     keypad(stdscr, TRUE);
+    // Common xterm encodings; plain Tab also works in older terminals.
+    define_key("\033[27;5;9~", NextTabKey);
+    define_key("\033[9;5u", NextTabKey);
+    define_key("\033[27;6;9~", PreviousTabKey);
+    define_key("\033[9;6u", PreviousTabKey);
     set_escdelay(50);
     TuiHighlighter::initColors();
 
@@ -115,6 +125,16 @@ bool TuiApp::closeCurrentTab() {
     return true;
 }
 
+void TuiApp::switchTab(int direction) {
+    if (m_buffers.empty()) return;
+    const int count = static_cast<int>(m_buffers.size());
+    m_activeBufferIndex = (m_activeBufferIndex + direction + count) % count;
+    m_highlighter.setDefinition(currentBuffer()->definition());
+    m_focus = TuiFocus::Editor;
+    m_viewTopRow = 0;
+    m_viewLeftCol = 0;
+}
+
 int TuiApp::run(const QStringList &files) {
     initCurses();
 
@@ -146,13 +166,26 @@ void TuiApp::render() {
     // 2. Render Document Tab Bar (Row 1)
     attron(COLOR_PAIR(12));
     mvhline(1, 0, ' ', m_termCols);
+    const auto tabLabel = [this](int index) {
+        return QStringLiteral(" %1: %2%3 ")
+            .arg(index + 1)
+            .arg(m_buffers[index]->fileName())
+            .arg(m_buffers[index]->isModified() ? QStringLiteral(" *") : QString());
+    };
+    // Keep the selected tab visible even when all labels do not fit.
+    int firstTab = m_activeBufferIndex;
+    int usedWidth = m_buffers.empty() ? 0 : tabLabel(firstTab).toUtf8().size() + 1;
+    while (firstTab > 0) {
+        int previousWidth = tabLabel(firstTab - 1).toUtf8().size() + 1;
+        if (usedWidth + previousWidth > m_termCols - 2) break;
+        usedWidth += previousWidth;
+        --firstTab;
+    }
+    if (firstTab > 0) mvaddch(1, 0, '<');
     int tabCol = 1;
-    for (size_t i = 0; i < m_buffers.size(); ++i) {
+    for (size_t i = firstTab; i < m_buffers.size(); ++i) {
         bool isActive = ((int)i == m_activeBufferIndex);
-        QString tabText = QStringLiteral(" %1: %2%3 ")
-                          .arg(i + 1)
-                          .arg(m_buffers[i]->fileName())
-                          .arg(m_buffers[i]->isModified() ? QStringLiteral(" *") : QString());
+        const QByteArray tabText = tabLabel(static_cast<int>(i)).toUtf8();
 
         if (isActive) {
             attron(COLOR_PAIR(11) | A_BOLD);
@@ -160,14 +193,17 @@ void TuiApp::render() {
             attron(COLOR_PAIR(12));
         }
 
-        mvaddstr(1, tabCol, tabText.toUtf8().constData());
+        mvaddnstr(1, tabCol, tabText.constData(), std::max(0, m_termCols - tabCol - 1));
 
         if (isActive) {
             attroff(COLOR_PAIR(11) | A_BOLD);
         }
 
         tabCol += tabText.size() + 1;
-        if (tabCol >= m_termCols - 10) break;
+        if (tabCol >= m_termCols - 1) {
+            if (i + 1 < m_buffers.size()) mvaddch(1, m_termCols - 1, '>');
+            break;
+        }
     }
     attroff(COLOR_PAIR(12));
 
@@ -537,7 +573,7 @@ void TuiApp::handleInput(int ch) {
         if (!m_showSidebar) m_focus = TuiFocus::Editor;
         return;
     }
-    if (ch == 9) { // Tab key toggles focus between Sidebar and Editor
+    if (ch == KEY_F(6)) { // F6 toggles focus between Sidebar and Editor
         if (m_showSidebar) {
             m_focus = (m_focus == TuiFocus::Editor) ? TuiFocus::Sidebar : TuiFocus::Editor;
             return;
@@ -563,18 +599,12 @@ void TuiApp::handleInput(int ch) {
         closeCurrentTab();
         return;
     }
-    if (ch == KEY_F(7) || ch == 2) { // F7 or Ctrl+B: Prev Tab
-        if (!m_buffers.empty()) {
-            m_activeBufferIndex = (m_activeBufferIndex > 0) ? m_activeBufferIndex - 1 : (int)m_buffers.size() - 1;
-            m_highlighter.setDefinition(currentBuffer()->definition());
-        }
+    if (ch == KEY_BTAB || ch == PreviousTabKey || ch == KEY_F(7) || ch == 2) {
+        switchTab(-1);
         return;
     }
-    if (ch == KEY_F(8) || ch == 20) { // F8 or Ctrl+T: Next Tab
-        if (!m_buffers.empty()) {
-            m_activeBufferIndex = (m_activeBufferIndex + 1) % m_buffers.size();
-            m_highlighter.setDefinition(currentBuffer()->definition());
-        }
+    if (ch == 9 || ch == NextTabKey || ch == KEY_F(8) || ch == 20) {
+        switchTab(1);
         return;
     }
 

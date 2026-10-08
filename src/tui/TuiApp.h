@@ -40,6 +40,7 @@ private:
     void openFile(const QString &filePath);
     void newBuffer();
     bool closeCurrentTab();
+    void switchTab(int direction);
 
     // Editor actions
     void onSave();

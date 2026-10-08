@@ -10,6 +10,7 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(KF6SyntaxHighlighting REQUIRED)
+set(CURSES_NEED_WIDE TRUE)
 find_package(Curses REQUIRED)
 find_package(CURL REQUIRED)
 

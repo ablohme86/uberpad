@@ -11,8 +11,8 @@ namespace UberPad {
 
 struct TermCell {
     QChar ch = ' ';
-    QColor fg = QColor(220, 220, 220);
-    QColor bg = QColor(24, 24, 28);
+    QColor fg = QColor("#F2E9DF");
+    QColor bg = QColor("#302D2B");
     bool bold = false;
     bool underline = false;
 };

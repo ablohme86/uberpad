@@ -23,9 +23,7 @@ all: release
 
 release:
 	@mkdir -p $(BUILD_DIR)
-	@if [ ! -f $(BUILD_DIR)/CMakeCache.txt ]; then \
-		cmake -B $(BUILD_DIR) -G "$(GENERATOR)" -DCMAKE_BUILD_TYPE=Release; \
-	fi
+	@cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release
 	@cmake --build $(BUILD_DIR) --parallel $(JOBS)
 	@ln -sf $(BUILD_DIR)/uberpad uberpad
 	@echo "==> Build complete: ./uberpad"

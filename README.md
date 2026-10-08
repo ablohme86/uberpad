@@ -71,9 +71,9 @@ UberPad har tosidig terminalstøtte:
      - Direkte hurtigåpning av menyer med **Alt+F** (File), **Alt+E** (Edit), **Alt+S** (Search), **Alt+V** (View), **Alt+L** (Language), **Alt+H** (Help).
      - Hurtigtast-bokstaver i menyene: Trykk f.eks. `x` for Exit, `n` for New, `o` for Open, `s` for Save.
      - Naviger mellom menyer med venstre/høyre piltaster og elementer med opp/ned, `Enter` for å velge, `Esc` for å lukke.
-   - **Dokument-fanelinje (Row 1):** Viser åpne dokumenter (`[ 1: main.cpp * ] [ 2: CMakeLists.txt ]`), veksle med `F7`/`F8` eller `Ctrl+B`/`Ctrl+T`.
+   - **Dokument-fanelinje (Row 1):** Viser åpne dokumenter (`[ 1: main.cpp * ] [ 2: CMakeLists.txt ]`), veksle med **Tab / Shift+Tab** (neste / forrige). `Ctrl+Tab` / `Ctrl+Shift+Tab` støttes når terminalen sender egne tastekoder; `F7`/`F8` og `Ctrl+B`/`Ctrl+T` fungerer også. Aktiv fane holdes synlig når fanelinjen er full.
    - **Filutforsker-sidemeny (F9):** Venstre sidepanel som viser mapper og filer i prosjektet (*Folder as Workspace*). Naviger med piltastene, trykk `Enter` for å åpne fil eller utvide/lukke mappe.
-   - **Fokus-veksling (Tab):** `Tab`-tasten bytter aktivt fokus direkte mellom filutforsker-sidemenyen og editoren.
+   - **Fokus-veksling (F6):** `F6`-tasten bytter aktivt fokus direkte mellom filutforsker-sidemenyen og editoren.
    - **Linjenummer-kolonne:** Viser linjenumre med fargeindikasjon for aktiv linje.
    - **Full syntaksfarging i terminalen** via samme KDE KF6-motor (460+ språk).
    - **Statuslinje:** Matcher GUI-statuslinjen (`Ln X, Col Y │ Lines: N, Length: M │ Unix (LF) │ UTF-8 │ C++ │ INS`).
@@ -101,6 +101,11 @@ UberPad benytter **KDE KF6SyntaxHighlighting**, som gir dekning for mer enn **46
 - `syntax-highlighting` (KDE KF6SyntaxHighlighting)
 - `ncurses`
 - `curl` (med SFTP/libssh2-støtte)
+
+På Fedora installeres utviklingspakkene slik:
+```bash
+sudo dnf install gcc-c++ cmake ninja-build qt6-qtbase-devel kf6-syntax-highlighting-devel ncurses-devel libcurl-devel
+```
 
 ### Bygging med Makefile
 ```bash
@@ -186,7 +191,8 @@ Ikonet er en vektortegnet kameleon og genereres fra
 | **Ctrl + D** | Dupliser linje eller markering |
 | **Ctrl + /** | Slå av/på kommentar for linje |
 | **Alt + Up / Down** | Flytt linje opp / ned |
-| **Tab / Shift+Tab** | Innrykk / utrykk av markert blokk (eller bytt fokus i TUI) |
+| **Tab / Shift+Tab** | Innrykk / utrykk av markert blokk i GUI; neste / forrige fil i TUI |
+| **F6** | Bytt fokus mellom editor og filutforsker i TUI |
 | **Ctrl + Alt + W** | Slå av/på linjebryting (Word Wrap) |
 | **Ctrl + Plus / Minus** | Zoom inn / ut |
 | **Ctrl + 0** | Tilbakestill zoom |

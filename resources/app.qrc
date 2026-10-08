@@ -9,4 +9,7 @@
         <file>icons/uberpad-24.png</file>
         <file>icons/uberpad-16.png</file>
     </qresource>
+    <qresource prefix="/org.kde.syntax-highlighting/themes-addons">
+        <file alias="sienna-slate.theme">themes/sienna-slate.theme</file>
+    </qresource>
 </RCC>

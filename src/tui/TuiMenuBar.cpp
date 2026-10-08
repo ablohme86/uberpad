@@ -203,7 +203,7 @@ void TuiMenuBar::render(int width) {
     }
 
     // Right side hints for classic DOS / Windows navigation
-    QString hint = QStringLiteral("[Alt+F: File  Alt+E: Edit  Alt+S: Search  F9: Tree  Tab: Switch] ");
+    QString hint = QStringLiteral("[Tab/Shift+Tab: Files  F6: Focus  F9: Tree] ");
     if (width > col + hint.size()) {
         attron(COLOR_PAIR(12));
         mvaddstr(0, width - hint.size(), hint.toUtf8().constData());

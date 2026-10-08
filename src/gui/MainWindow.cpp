@@ -521,27 +521,40 @@ void MainWindow::applyTheme(const QString &themeName) {
     bool isDark = (qGray(theme.editorColor(KSyntaxHighlighting::Theme::BackgroundColor)) < 128);
     QPalette pal = qApp->palette();
     if (isDark) {
-        pal.setColor(QPalette::Window, QColor(33, 34, 44));
-        pal.setColor(QPalette::WindowText, QColor(240, 240, 240));
-        pal.setColor(QPalette::Base, QColor(24, 25, 32));
-        pal.setColor(QPalette::AlternateBase, QColor(36, 38, 48));
-        pal.setColor(QPalette::Text, QColor(240, 240, 240));
-        pal.setColor(QPalette::Button, QColor(40, 42, 54));
-        pal.setColor(QPalette::ButtonText, QColor(240, 240, 240));
-        pal.setColor(QPalette::Mid, QColor(60, 62, 75));
-        pal.setColor(QPalette::Highlight, QColor(68, 71, 90));
+        pal.setColor(QPalette::Window, QColor("#38332F"));
+        pal.setColor(QPalette::WindowText, QColor("#F2E9DF"));
+        pal.setColor(QPalette::Base, QColor("#302D2B"));
+        pal.setColor(QPalette::AlternateBase, QColor("#413A34"));
+        pal.setColor(QPalette::Text, QColor("#F2E9DF"));
+        pal.setColor(QPalette::Button, QColor("#484038"));
+        pal.setColor(QPalette::ButtonText, QColor("#F2E9DF"));
+        pal.setColor(QPalette::Mid, QColor("#60544A"));
+        pal.setColor(QPalette::Highlight, QColor("#A94710"));
     } else {
         pal.setColor(QPalette::Window, QColor(245, 245, 247));
         pal.setColor(QPalette::WindowText, QColor(30, 30, 30));
         pal.setColor(QPalette::Base, QColor(255, 255, 255));
-        pal.setColor(QPalette::AlternateBase, QColor(240, 240, 240));
+        pal.setColor(QPalette::AlternateBase, QColor("#F2E9DF"));
         pal.setColor(QPalette::Text, QColor(30, 30, 30));
         pal.setColor(QPalette::Button, QColor(235, 235, 238));
         pal.setColor(QPalette::ButtonText, QColor(30, 30, 30));
         pal.setColor(QPalette::Mid, QColor(200, 200, 200));
-        pal.setColor(QPalette::Highlight, QColor(180, 210, 255));
+        pal.setColor(QPalette::Highlight, QColor("#A94710"));
     }
+    pal.setColor(QPalette::HighlightedText, QColor("#FFF5EB"));
+    pal.setColor(QPalette::Link, isDark ? QColor("#E6A16A") : QColor("#A94710"));
+    pal.setColor(QPalette::PlaceholderText, isDark ? QColor("#AAA49C") : QColor("#70665E"));
+    pal.setColor(QPalette::Disabled, QPalette::Text, QColor("#8C8783"));
+    pal.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#8C8783"));
     qApp->setPalette(pal);
+    qApp->setStyleSheet(QStringLiteral(
+        "QTabBar::tab { padding: 6px 12px; border-bottom: 2px solid transparent; }"
+        "QTabBar::tab:selected { border-bottom: 2px solid #C46A2E; }"
+        "QTabBar::tab:hover { background: palette(alternate-base); }"
+        "QDockWidget::title { padding: 5px 8px; background: palette(window); }"
+        "QStatusBar { border-top: 1px solid palette(mid); }"
+        "QToolTip { color: palette(text); background: palette(base); "
+        "border: 1px solid #C46A2E; padding: 4px 6px; }"));
 }
 
 void MainWindow::onThemeSelected(const QString &themeName) {

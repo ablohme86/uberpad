@@ -36,8 +36,8 @@ KSyntaxHighlighting::Theme SyntaxManager::theme(const QString &name) const {
 }
 
 KSyntaxHighlighting::Theme SyntaxManager::defaultDarkTheme() const {
-    // Try Dracula, Breeze Dark, Monokai, then fallback
-    auto th = m_repo.theme(QStringLiteral("Dracula"));
+    // Prefer the bundled palette, then fall back to a built-in dark theme.
+    auto th = m_repo.theme(QStringLiteral("Sienna & Slate"));
     if (th.isValid()) return th;
     th = m_repo.theme(QStringLiteral("Breeze Dark"));
     if (th.isValid()) return th;

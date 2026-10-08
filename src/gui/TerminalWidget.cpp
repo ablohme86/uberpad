@@ -22,22 +22,22 @@
 namespace UberPad {
 
 const QColor TerminalView::s_ansiColors[16] = {
-    QColor(0x28, 0x2a, 0x36), // 0: Black
-    QColor(0xff, 0x55, 0x55), // 1: Red
-    QColor(0x50, 0xfa, 0x7b), // 2: Green
-    QColor(0xf1, 0xfa, 0x8c), // 3: Yellow
-    QColor(0xbd, 0x93, 0xf9), // 4: Blue
-    QColor(0xff, 0x79, 0xc6), // 5: Magenta
-    QColor(0x8b, 0xe9, 0xfd), // 6: Cyan
-    QColor(0xbf, 0xbf, 0xbf), // 7: White
-    QColor(0x4d, 0x4d, 0x4d), // 8: Bright Black
-    QColor(0xff, 0x6e, 0x6e), // 9: Bright Red
-    QColor(0x69, 0xff, 0x94), // 10: Bright Green
-    QColor(0xff, 0xff, 0xa5), // 11: Bright Yellow
-    QColor(0xd6, 0xac, 0xff), // 12: Bright Blue
-    QColor(0xff, 0x92, 0xdf), // 13: Bright Magenta
-    QColor(0xa4, 0xff, 0xff), // 14: Bright Cyan
-    QColor(0xff, 0xff, 0xff)  // 15: Bright White
+    QColor("#302D2B"),
+    QColor("#D88978"),
+    QColor("#AAB98A"),
+    QColor("#D9BC86"),
+    QColor("#A0BAC3"),
+    QColor("#B9A6B8"),
+    QColor("#A5C7BD"),
+    QColor("#D8D4CE"),
+    QColor("#82766B"),
+    QColor("#F1A08C"),
+    QColor("#C7D5A7"),
+    QColor("#EED3A0"),
+    QColor("#BCD4DC"),
+    QColor("#D5BED2"),
+    QColor("#C0DED3"),
+    QColor("#FFF5EB")
 };
 
 QColor TerminalView::colorFrom256(int idx) {
@@ -57,8 +57,8 @@ QColor TerminalView::colorFrom256(int idx) {
 
 TerminalView::TerminalView(QWidget *parent)
     : QWidget(parent)
-    , m_defaultFg(QColor(230, 230, 230))
-    , m_defaultBg(QColor(24, 24, 30))
+    , m_defaultFg(QColor("#F2E9DF"))
+    , m_defaultBg(QColor("#302D2B"))
 {
     setFocusPolicy(Qt::StrongFocus);
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -501,7 +501,7 @@ void TerminalView::paintEvent(QPaintEvent * /* event */) {
     if (m_scrollOffset == 0 && m_cursorVisible && m_cursorBlinkState && hasFocus()) {
         int cx = m_curX * m_charWidth;
         int cy = m_curY * m_charHeight;
-        painter.fillRect(cx, cy, m_charWidth, m_charHeight, QColor(240, 240, 240, 180));
+        painter.fillRect(cx, cy, m_charWidth, m_charHeight, QColor(230, 161, 106, 180));
     }
 }
 

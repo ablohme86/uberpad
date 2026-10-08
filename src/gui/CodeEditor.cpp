@@ -197,6 +197,7 @@ void CodeEditor::applyThemeColors() {
     QColor selBg = m_theme.editorColor(KSyntaxHighlighting::Theme::TextSelection);
     if (!selBg.isValid()) selBg = QColor(50, 75, 120);
     pal.setColor(QPalette::Highlight, selBg);
+    pal.setColor(QPalette::HighlightedText, m_theme.selectedTextColor(KSyntaxHighlighting::Theme::Normal));
 
     setPalette(pal);
     m_lineNumberArea->update();
